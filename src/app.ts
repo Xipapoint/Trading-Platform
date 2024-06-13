@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
+import { Security } from "./utils/security";
 const app: Application = express();
 
 app.use(helmet());
@@ -24,7 +25,7 @@ const PORT = process.env.PORT as number | undefined
 
 const start = async () => {
   try {
-    AppDataSource.initialize();
+    // AppDataSource.initialize();
     app.listen(PORT, () => console.log(`Server started on PORT = ${PORT}`));
   } catch (e) {
     console.log(e);
