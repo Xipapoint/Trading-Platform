@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
+import { Security } from "./utils/security";
 const app: Application = express();
 
 app.use(helmet());
