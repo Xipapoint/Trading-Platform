@@ -22,7 +22,7 @@ const userSchema: Schema<IUser> = new Schema({
     role: {type: String, required: true, default: "USER"},
     age: {type: Number, required: true},
     balance: {type: Number, required: true, default: 0.00},
-    cooldown: {type: Date}, //datetime
+    cooldown: {type: Date}, 
     prefferedCurrency: {type: String, required: true, default: "USD"}
 });
 
