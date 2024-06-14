@@ -24,15 +24,15 @@ export class Trade extends BaseEntity {
   @Column({ default: 'pending' })
   status: 'pending' | 'completed' | 'cancelled' | 'expired';
 
-  @Column({ default: null, nullable: true })
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP", nullable: true })
   completedAt: Date;
 
   @ManyToOne(() => User, user => user.trades)
   user: User;
 
-  @CreateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 }

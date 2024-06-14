@@ -15,6 +15,10 @@ export class User {
   @Column()
   hashedPassword: string;
 
+  // Short access code, example: 4537. Have to be hashed aswell
+  @Column()
+  shortAccessCode: string;
+
   @Column()
   email: string;
 
@@ -29,11 +33,11 @@ export class User {
   balance: number;
 
   // Cooldown for trading
-  @Column({ nullable: true })
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   cooldownTrade: Date;
 
   // Deposit limit to avoid currency depreciation
-  @Column({ nullable: true })
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   cooldownPayment: Date;
 
   @Column({ default: 'USD' })
@@ -50,30 +54,30 @@ export class User {
   refferalLink: string;
 
   // Amount of bidding participations between users for further use of AI model training
-  @Column()
+  @Column({default: 0})
   participationInTrades: number;
 
   // Amount of successed trades between users for further use of AI model training
-  @Column()
+  @Column({default: 0})
   successfulTrades: number;
 
   // Amount of engaged people for further use of AI model training
-  @Column()
+  @Column({default: 0})
   referrals: number;
 
   // Amount of items in trades for further use of AI model training
-  @Column()
+  @Column({default: 0})
   tradesVolume: number;
 
-  @Column()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   lastActive: Date;
 
   // Amount of trades last month for further use of AI model training
-  @Column()
+  @Column({default: 0})
   tradesLastMonth: number;
 
   // Value of trades` density last month for further use of AI model training
-  @Column()
+  @Column({default: 0})
   tradeDensityLastMonth: number;
 
   @Column({ enum: ['online', 'offline'] })
@@ -94,9 +98,9 @@ export class User {
   @OneToMany(() => User, user => user.friends)
   friends: User[];
 
-  @CreateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 }

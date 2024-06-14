@@ -14,4 +14,10 @@ export class Card extends BaseEntity{
 
     @OneToOne(() => User, user => user.card)
     user: User;
+
+    @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
+    createdAt: Date;
+  
+    @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
+    updatedAt: Date;
 }

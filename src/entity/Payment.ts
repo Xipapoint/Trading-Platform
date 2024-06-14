@@ -29,10 +29,10 @@ export class Payment extends BaseEntity {
   @Column()
   currency: string;
 
-  @CreateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 
   @ManyToOne(() => User, user => user.payments)

@@ -18,12 +18,12 @@ export class Transaction extends BaseEntity {
   @Column({ default: 'pending', enum: ['pending', 'completed', 'failed'] })
   status: string;
 
-  @CreateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
-
+  
   @ManyToOne(() => User, user => user.transactions)
   user: User;
 }

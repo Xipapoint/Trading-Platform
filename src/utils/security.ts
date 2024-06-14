@@ -13,11 +13,30 @@ export class Security {
     return result;
   }
 
+  private static timestampIntGenerateId(): number {
+    const uniqueNumber: string = new Date().toISOString().slice(2, 3) + 
+        this.generateRandomNumber(3) +
+        new Date().toISOString().slice(3, 10).replace(/-/g, '') +
+        this.generateRandomNumber(2) +
+        new Date().getMinutes().toString().padStart(2, '0');
+    return parseInt(uniqueNumber, 10);
+  }
+
 
   // PUBLIC
-  public static async hash(data: string): Promise<string> {
+  public static async hashPassword(data: string): Promise<string> {
     const saltRounds = 10; // количество раундов хеширования
     const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(data, salt);
+    return hash;
+  }
+
+  //TODO: HASH EMAIL
+
+  public static async createCardNumber(): Promise<string> {
+    const saltRounds = 15; // количество раундов хеширования
+    const salt = await bcrypt.genSalt(saltRounds);
+    const data: string = this.timestampIntGenerateId().toString();
     const hash = await bcrypt.hash(data, salt);
     return hash;
   }
@@ -28,12 +47,4 @@ export class Security {
     return originalHash === hashVerify;
   }
 
-  public static timestampIntGenerateId(): number {
-    const uniqueNumber: string = new Date().toISOString().slice(2, 3) + 
-        Security.generateRandomNumber(3) +
-        new Date().toISOString().slice(3, 10).replace(/-/g, '') +
-        Security.generateRandomNumber(2) +
-        new Date().getMinutes().toString().padStart(2, '0');
-    return parseInt(uniqueNumber, 10);
-  }
 }
