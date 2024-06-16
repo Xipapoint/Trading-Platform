@@ -24,14 +24,16 @@ export class Security {
 
 
   // PUBLIC
-  public static async hashPassword(data: string): Promise<string> {
+  public static async hash(data: string): Promise<string> {
     const saltRounds = 10; // количество раундов хеширования
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(data, salt);
     return hash;
   }
 
-  //TODO: HASH EMAIL
+  public static async generateRandomUUID() : Promise<string>{
+    return await crypto.randomUUID();
+  }
 
   public static async createCardNumber(): Promise<string> {
     const saltRounds = 15; // количество раундов хеширования

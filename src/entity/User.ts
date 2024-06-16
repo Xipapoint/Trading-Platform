@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import {Card} from './Card'; // Подставьте вашу сущность Card
+import {Card} from './Card';
 import {Transaction} from './Transactions'
-import { Trade } from './Trade'; // Подставьте вашу сущность Trade
-import {Payment} from './Payment'; // Подставьте вашу сущность Payment
+import { Trade } from './Trade';
+import {Payment} from './Payment'; 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
