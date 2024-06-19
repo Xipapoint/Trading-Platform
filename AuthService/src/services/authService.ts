@@ -1,34 +1,89 @@
+import { Repository } from 'typeorm';
 import { AppDataSource } from '../dataSource';
-import { RegiterUserRequestDto } from '../dto/request/RegisterUserRequestDTO.dto';
-import { JwtUserResponseDto } from '../dto/response/JwtUserResponseDTO.dto';
+import { ILoginUserRequestDto } from '../dto/request/LoginUserRequestDTO.dto';
+import { IRegiterUserRequestDto } from '../dto/request/RegisterUserRequestDTO.dto';
+import { IJwtUserResponseDto } from '../dto/response/JwtUserResponseDTO.dto';
 import { User } from '../entity/User';
-import producer from '../producer';
+import { balanceProducer, cardProducer, inventoryProducer } from '../producer';
 import { Mappers } from '../utils/mappers';
 import { Security } from '../utils/security';
-import TokenService from './TokenService';
-import UserServiceImpl from './impl/userServiceImpl';
+import IAuthServiceImpl from './impl/authServiceImpl';
+import bcrypt from 'bcrypt';
+import { ITokenServiceImpl } from './impl/tokenService.impl';
+import TokenService from './tokenService';
+import { ISecureRegisterResponseDTO } from '../dto/response/SecureRegisterResponseDTO';
 
-class AuthService implements UserServiceImpl {
+class AuthService implements IAuthServiceImpl {
+    private tokenService: ITokenServiceImpl;
+    private userRepository: Repository<User>;
+    constructor(tokenService: ITokenServiceImpl, userRepository: Repository<User>){
+        this.tokenService = tokenService;
+        this.userRepository = userRepository
+    }
+    //PRIVATE
 
-   async registrationService(RegisterData : RegiterUserRequestDto) : Promise<JwtUserResponseDto> {
-        const userRepository = AppDataSource.getRepository(RegisterData.email);
-        const existingUser = await userRepository.findOne({ where: { email: RegisterData.email } });
-        if(existingUser){
-            throw new Error("User already exists");
+    private async getUserIdFromAccessToken(token: string): Promise<string> {
+        try {
+            const payload = await this.tokenService.verifyAccessToken(token);
+            return payload.id;
+        } catch (error) {
+            throw new Error('Invalid token');
         }
-        const hashedPassword : string = await Security.hash(RegisterData.password);
+    }
+
+    private async secureRegisterData(RegisterData: IRegiterUserRequestDto): Promise<ISecureRegisterResponseDTO>{
+        const hashedPassword: string = await Security.hash(RegisterData.password);
         const shortAccessCode: string = await Security.hash(RegisterData.shortAccessCode);
-        const email: string = await Security.hash(RegisterData.email);
-        const addFriendLink: string = await Security.generateRandomUUID();;
-        const refferalLink: string = await Security.generateRandomUUID()
+        const email: string = RegisterData.email;
+        const addFriendLink: string = await Security.generateRandomUUID();
         const age: number = RegisterData.age;
         const username: string = RegisterData.username;
 
-        const user: User = await AppDataSource.getRepository(User).create({hashedPassword, shortAccessCode, age, username, email, addFriendLink})
-        await producer.publishMessage("createCard", user.id);
-        await producer.publishMessage("createInventory", user.id);
-        const tokens: JwtUserResponseDto = TokenService.generateTokens(Mappers.UserToJWTDTO(user));
+        return { hashedPassword, shortAccessCode, age, username, email, addFriendLink }
+    }
+
+
+
+    // PUBLIC 
+   async registrationService(RegisterData: IRegiterUserRequestDto) : Promise<IJwtUserResponseDto> {
+        const existingUser = await this.userRepository.findOne({ where: { email: RegisterData.email } });
+        if(existingUser){
+            throw new Error("User already exists");
+        }
+        const secureData: ISecureRegisterResponseDTO = await this.secureRegisterData(RegisterData);
+        const user: User = this.userRepository.create(secureData)
+        await cardProducer.publishCreateCard(user.id);
+        await inventoryProducer.publishCreateInventory(user.id);
+        await balanceProducer.publishCreateBalance(user.id);
+        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(user));
         return tokens
     }
+
+    async verifyShortAccessCode(token: string, shortAccessCode: string): Promise<boolean> {
+        const sessionUserId: string = await this.getUserIdFromAccessToken(token);
+        const user = await this.userRepository.findOne({where: { id: sessionUserId }});
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const isCodeMatch = await bcrypt.compare(shortAccessCode, user.shortAccessCode);
+        return isCodeMatch;
+    }
+
+    async login(LoginData: ILoginUserRequestDto): Promise<IJwtUserResponseDto> {
+        const existingUser: User | null = await this.userRepository.findOne({ where: { email: LoginData.email } });
+        if(existingUser === null){
+            throw new Error("User doesnt exist");
+        }
+        const password: string = LoginData.password;
+        const isPassEquals: boolean = await bcrypt.compare(password, existingUser.hashedPassword);
+        if (!isPassEquals) {
+            throw Error('Неверный пароль');
+        }
+        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(existingUser));
+        await this.tokenService.saveToken(existingUser.id, tokens.refreshToken);
+        return tokens;
+    }
 }
-export default new AuthService();
+export default new AuthService(TokenService, AppDataSource.getRepository(User));

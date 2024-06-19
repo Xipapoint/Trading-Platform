@@ -1,4 +1,4 @@
-export class RegiterUserRequestDto {
+export interface IRegiterUserRequestDto {
     username: string;
     password: string;
     shortAccessCode: string;

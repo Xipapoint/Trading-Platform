@@ -1,8 +1,8 @@
-import { JwtUserRequestDto } from "../dto/request/JwtUserRequestDTO.dto";
+import { IJwtUserRequestDto } from "../dto/request/JwtUserRequestDTO.dto";
 import { User } from "../entity/User";
 
 export class Mappers{
-    static UserToJWTDTO(UserData: User): JwtUserRequestDto{
+    static UserToJWTDTO(UserData: User): IJwtUserRequestDto{
         const id: string = UserData.id;
         const email: string = UserData.email;
         const age = UserData.age;

@@ -1,4 +1,4 @@
-export class JwtUserRequestDto {
+export interface JwtUserRequestDto {
     id: string;
     email: string;
     age: number;

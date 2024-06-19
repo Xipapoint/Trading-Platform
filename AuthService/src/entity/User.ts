@@ -50,6 +50,9 @@ export class User {
   @Column()
   refferalLinkId: string;
 
+  @Column()
+  isActivated: boolean
+
   // // Amount of bidding participations between users for further use of AI model training
   // @Column({default: 0})
   // participationInTrades: number;

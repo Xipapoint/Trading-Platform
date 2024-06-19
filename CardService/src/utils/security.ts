@@ -38,8 +38,4 @@ export class Security {
     const hash = await bcrypt.hash(data, salt);
     return hash;
   }
-
-  public static async generateRandomUUID() : Promise<string>{
-    return await crypto.randomUUID();
-  }
 }

@@ -1,4 +1,4 @@
-export class JwtUserResponseDto {
+export class IJwtUserResponseDto {
     accessToken: string;
     refreshToken: string;
 }
