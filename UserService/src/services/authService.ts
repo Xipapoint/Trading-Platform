@@ -45,9 +45,8 @@ class AuthService implements IAuthServiceImpl {
         const secureData: ISecureRegisterResponseDTO = await this.secureRegisterData(RegisterData);
         const walletAmount: number = 1;
         const user: User = this.userRepository.create({...secureData, walletAmount})
-        // producer.publishMessage('create_wallet', user.id);
-        // this.sendCreateEntityMessage('create_inventory', user.id);
-        // this.sendCreateEntityMessage('create_profile', user.id);
+        // producer.publishMessage('create_inventory', user.id);
+        // producer.publishMessage('create_profile', user.id);
         const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(user));
         return tokens
     }

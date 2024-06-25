@@ -21,7 +21,7 @@ class Producer {
       }
 
       // await this.channel?.assertExchange(rabbitMQ.exchangeName, 'topic', {durable: true});
-      await this.channel.assertQueue(rabbitMQ.queueName);
+      await this.channel.assertQueue(rabbitMQ.queueName, { durable: true });
 
       this.channel.sendToQueue(rabbitMQ.queueName, Buffer.from(message));
 

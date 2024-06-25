@@ -2,24 +2,40 @@ import amqp from "amqplib"
 
 const rabbitMQ = {
   url: 'amqp://localhost',
-  exchangeName: 'cardEvents',
-  routingKey: 'userCard'
+  queueName: 'create_wallet',
 };
 
-async function startConsumer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
+class Producer {
+  protected channel: amqp.Channel | undefined;
+  protected connection: amqp.Connection | undefined;
 
-  const { queue } = await channel.assertQueue('create_entities');
-  console.log(`Waiting for messages in queue ${queue}`);
+  async startConsumer() {
 
-  channel.consume('create_entities', async (msg) => {
-    if (msg !== null) {
-      const { type, userId } = JSON.parse(msg.content.toString());
-      if (type === 'create_wallet') {
-        // await createWallet(userId);
+    try {
+      if (!this.connection) {
+        this.connection = await amqp.connect(rabbitMQ.url);
       }
-      channel.ack(msg);
+      if (!this.channel) {
+        this.channel = await this.connection.createChannel();
+      }
+
+      await this.channel.assertQueue('test');
+      // TODO: CREATE CONSUMER!!!
+      
+      // console.log(`Waiting for messages in queue ${queue}`);
+      // this.channel.consume('create_wallet', async (msg) => {
+      //   if (msg !== null) {
+      //     const { type, userId } = JSON.parse(msg.content.toString());
+      //     if (type === 'create_wallet') {
+      //       // await createWallet(userId);
+      //     }
+      //     if(this.channel) this.channel.ack(msg);
+      //   }
+      // });
+
+    } catch (error) {
+      console.error('Error publishing message', error);
     }
-  });
+
+  }
 }
