@@ -1,4 +1,4 @@
 export interface IJwtUserRequestDto {
-    id: string;
+    userId: string;
     age: number;
 }

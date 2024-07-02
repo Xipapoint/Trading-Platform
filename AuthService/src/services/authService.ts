@@ -47,8 +47,8 @@ class AuthService implements IAuthServiceImpl {
         // Может прямо через axios ???
         // producer.publishMessage('create_inventory', user.id);
         // producer.publishMessage('create_profile', user.id);
-        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(user));
-        this.userRepository.save(user)
+        await this.userRepository.save(user)
+        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(user.id, user.age);
         return tokens
     }
 
@@ -74,7 +74,7 @@ class AuthService implements IAuthServiceImpl {
         if (!isPassEquals) {
             throw Error('Неверный пароль');
         }
-        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(existingUser));
+        const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(existingUser.id, existingUser.age);
         await this.tokenService.saveToken(existingUser.id, tokens.refreshToken);
         return tokens;
     }

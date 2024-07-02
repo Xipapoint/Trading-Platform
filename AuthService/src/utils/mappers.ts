@@ -3,8 +3,8 @@ import { User } from "../entity/User";
 
 export class Mappers{
     static UserToJWTDTO(UserData: User): IJwtUserRequestDto{
-        const id: string = UserData.id;
+        const userId: string = UserData.id;
         const age = UserData.age;
-        return {id, age};
+        return {userId, age};
     }
 }

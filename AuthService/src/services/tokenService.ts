@@ -4,14 +4,18 @@ import { Token } from "../entity/Tokens";
 import { AppDataSource } from "../dataSource";
 import { ITokenServiceImpl } from "./impl/tokenService.impl";
 import { IJwtUserResponseDto } from "../dto/response/JwtUserResponseDTO.dto";
+import { Repository } from "typeorm";
 
 class tokenService implements ITokenServiceImpl{
     private jwt: typeof jwt;
+    private tokenRepository: Repository<Token>;
 
-    constructor() {
+    constructor(tokenRepository: Repository<Token>) {
+        this.tokenRepository = tokenRepository
         this.jwt = jwt;
     }
-    public generateTokens(payload: IJwtUserRequestDto) : IJwtUserResponseDto {
+    public generateTokens(userId: string, userAge: number) : IJwtUserResponseDto {
+        const payload = {userId, userAge}
         const accessToken = this.jwt.sign(
             payload,
             process.env.JWT_ACCESS_SECRET as string,
@@ -22,6 +26,8 @@ class tokenService implements ITokenServiceImpl{
             process.env.JWT_REFRESH_SECRET as string,
             { expiresIn: '30d' }
         );
+        const refreshTokenEntity: Token = this.tokenRepository.create({userId, refreshToken})
+        this.tokenRepository.save(refreshTokenEntity)
 
         return {
             accessToken,
@@ -49,4 +55,4 @@ class tokenService implements ITokenServiceImpl{
     }
 }
 
-export default new tokenService();
+export default new tokenService(AppDataSource.getRepository(Token));
