@@ -43,11 +43,12 @@ class AuthService implements IAuthServiceImpl {
             throw new Error("User already exists");
         }
         const secureData: ISecureRegisterResponseDTO = await this.secureRegisterData(RegisterData);
-        const walletAmount: number = 1;
-        const user: User = this.userRepository.create({...secureData, walletAmount})
+        const user: User = this.userRepository.create({...secureData})
+        // Может прямо через axios ???
         // producer.publishMessage('create_inventory', user.id);
         // producer.publishMessage('create_profile', user.id);
         const tokens: IJwtUserResponseDto = this.tokenService.generateTokens(Mappers.UserToJWTDTO(user));
+        this.userRepository.save(user)
         return tokens
     }
 

@@ -24,6 +24,16 @@ class WalletSerivce implements IWalletServiceImpl{
         return this.walletRepository.findOne({where: {id: walletId}})
     }
 
+    async getWalletsByUser(token: string): Promise<string[]>{
+        let walletsIds: string[] = []
+        const userId: string = (jwt.verify(token, 'test') as JwtPayload).id
+        const wallets: Wallet[] = await this.walletRepository.findBy({userId: userId})
+        for(let i = 0; i < wallets.length; i++){
+            walletsIds[i] = wallets[i].id;
+        }
+        return walletsIds;
+    }
+
     //PUBLIC
     async createWallet(walletData: ICreateWalletRequestDTO): Promise<Wallet> {
         const walletAmount = await axios.get('/user/walletamount');
@@ -70,9 +80,25 @@ class WalletSerivce implements IWalletServiceImpl{
             throw new Error("wallet doesnt exist")
         }
         const newWalletPassword: string = await Security.hash(walletData.walletPassword);
-        wallet.walletNumber = newWalletPassword;
+        wallet.walletPassword = newWalletPassword;
+        this.walletRepository.save(wallet)
         return wallet;
     }
+
+    async setActiveCurrentCard(walletId: string, token: string): Promise<Wallet> {
+        const userId: string = (jwt.verify(token, 'test') as JwtPayload).id
+        const walletsId: string[] = await this.getWalletsByUser(token);
+        if(walletsId.length === 0) throw new Error("No wallets created by user")
+        const wallet = await this.getWalletById(walletId);
+        if(wallet === null) throw new  Error("Couldnt find wallet")
+        await producer.publishMessage('user_queue', 'activated_wallet', userId, walletId) // с await или без
+        // Установить wallet.isCurrentActive в true
+        return wallet
+    }
+    freezeCard(walletId: string): Promise<Wallet> {
+        throw new Error("Method not implemented.");
+    }
+
 }
 
 export default new WalletSerivce(AppDataSource.getRepository(Wallet));

@@ -9,7 +9,7 @@ class Producer {
     protected channel: amqp.Channel | undefined;
     protected connection: amqp.Connection | undefined;
   
-    public async publishMessage(queueName: string, type: string, dataMessage: string) {
+    public async publishMessage(queueName: string, type: string, dataMessage: string, walletId?: string) {
       try {
         if (!this.connection) {
           this.connection = await amqp.connect(rabbitMQ.url);
@@ -20,7 +20,8 @@ class Producer {
 
         const message = {
             typeMessage: type,
-            data: dataMessage
+            data: dataMessage,
+            walletId: walletId
         }
   
         // await this.channel?.assertExchange(rabbitMQ.exchangeName, 'topic', {durable: true});

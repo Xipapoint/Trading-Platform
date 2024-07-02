@@ -2,8 +2,7 @@ import amqp from "amqplib";
 
 
 const rabbitMQ = {
-  url: "amqp://localhost",
-  queueName:'create_entities'
+  url: "amqp://localhost"
 };
 
 
@@ -11,7 +10,7 @@ class Producer {
   protected channel: amqp.Channel | undefined;
   protected connection: amqp.Connection | undefined;
 
-  public async publishMessage(type: string, message: string) {
+  public async publishMessage(queueName: string, message: string) {
     try {
       if (!this.connection) {
         this.connection = await amqp.connect(rabbitMQ.url);
@@ -21,11 +20,11 @@ class Producer {
       }
 
       // await this.channel?.assertExchange(rabbitMQ.exchangeName, 'topic', {durable: true});
-      await this.channel.assertQueue(rabbitMQ.queueName, { durable: true });
+      await this.channel.assertQueue(queueName, { durable: true });
 
-      this.channel.sendToQueue(rabbitMQ.queueName, Buffer.from(message));
+      this.channel.sendToQueue(queueName, Buffer.from(message));
 
-      console.log(`A new ${type} event has been detected and sent to ${rabbitMQ.queueName}`);
+      console.log(`A new ${queueName} event has been detected and sent to ${queueName}`);
     } catch (error) {
       console.error('Error publishing message', error);
     }

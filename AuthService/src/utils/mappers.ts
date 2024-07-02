@@ -5,6 +5,6 @@ export class Mappers{
     static UserToJWTDTO(UserData: User): IJwtUserRequestDto{
         const id: string = UserData.id;
         const age = UserData.age;
-        return {id, email, age};
+        return {id, age};
     }
 }

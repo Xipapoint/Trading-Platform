@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -13,7 +13,7 @@ export class User {
   hashedPassword: string;
 
   // Short access code, example: 4537. Have to be hashed aswell
-  @Column()
+  @Column({length: 255})
   shortAccessCode: string;
 
   @Column()
@@ -26,22 +26,25 @@ export class User {
   @Column()
   age: number;
 
-  @Column({ nullable: true })
-  avatar: string;
+  // @Column({ nullable: true })
+  // avatar: string;
 
   // Cooldown for trading
-  @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
-  cooldownTrade: Date;
+  // @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
+  // cooldownTrade: Date;
 
   // Have to work the same as in Steam
-  @Column()
-  addFriendLink: string;
+  // @Column()
+  // addFriendLink: string;
 
-  @Column()
-  refferalLinkId: string;
+  // @Column()
+  // refferalLinkId: string;
 
-  @Column()
-  walletAmount: number;
+  // @Column()
+  // walletAmount: number;
+
+  // @Column({default: undefined})
+  // currentWalletId: string;
 
   // // Amount of bidding participations between users for further use of AI model training
   // @Column({default: 0})
@@ -70,8 +73,8 @@ export class User {
   // @Column({default: 0})
   // tradeDensityLastMonth: number;
 
-  @Column({ enum: ['online', 'offline'] })
-  status: string;
+  // @Column({ enum: ['online', 'offline'] })
+  // status: string;
 
   // @OneToMany(() => Card, card => card.user)
   // card: Card[];
@@ -88,8 +91,8 @@ export class User {
   // @OneToMany(() => User, user => user.friends)
   // friends: User[];
 
-  @Column()
-  inventoryId: string;
+  // @Column()
+  // inventoryId: string;
 
   @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;

@@ -9,7 +9,7 @@ export class Wallet{
     @Column()
     walletNumber: string;
     // Has to be hashed and cointaned 3-4 numbers
-    @Column()
+    @Column({length: 4})
     walletPassword: string;
 
     @Column({default: false})
