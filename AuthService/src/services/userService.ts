@@ -11,10 +11,10 @@ class UserService implements IUserServiceImpl{
         this.userRepository = userRepository
     }
     async getUserWalletAmount(token: string): Promise<number | null> {
-        const userId: string = await Helpers.getUserIdFromAccessToken(token);
+        const userId: string = await Helpers.getUserIdFromRefreshToken(token);
         const user: User | null = await this.userRepository.findOne({where: {id: userId}})
         if(user !== null){
-            return user.walletAmount;
+            return -1;
         }
         return null
     }

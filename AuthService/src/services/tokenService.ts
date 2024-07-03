@@ -46,8 +46,14 @@ class tokenService implements ITokenServiceImpl{
         return token;
     }
 
-    public async verifyAccessToken(token: string): Promise<JwtPayload> {
-        return jwt.verify(token, process.env.JWT_ACCESS_SECRET as string) as JwtPayload;
+    public async verifyAccessToken(token: string): Promise<JwtPayload | null> {
+        try{
+            const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string) as JwtPayload;
+            return userData
+        } catch(e){
+            return null
+        }
+
     }
 
     public async verifyRefreshToken(token: string): Promise<JwtPayload> {

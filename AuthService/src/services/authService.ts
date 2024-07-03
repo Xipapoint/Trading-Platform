@@ -31,7 +31,7 @@ class AuthService implements IAuthServiceImpl {
         const age: number = RegisterData.age;
         const username: string = RegisterData.username;
 
-        return { hashedPassword, shortAccessCode, age, username, email, addFriendLink }
+        return { hashedPassword, shortAccessCode, age, username, email }
     }
 
 
@@ -53,7 +53,7 @@ class AuthService implements IAuthServiceImpl {
     }
 
     async verifyShortAccessCode(token: string, shortAccessCode: string): Promise<boolean> {
-        const sessionUserId: string = await Helpers.getUserIdFromAccessToken(token);
+        const sessionUserId: string = await Helpers.getUserIdFromRefreshToken(token);
         const user = await this.userRepository.findOne({where: { id: sessionUserId }});
 
         if (!user) {
@@ -65,7 +65,12 @@ class AuthService implements IAuthServiceImpl {
     }
 
     async login(LoginData: ILoginUserRequestDto): Promise<IJwtUserResponseDto> {
-        const existingUser: User | null = await this.userRepository.findOne({ where: { email: LoginData.email } });
+        const existingUser: User | null = await this.userRepository.findOne({
+            where: [
+              { email: LoginData.email },
+              { username: LoginData.username }
+            ]
+          });
         if(existingUser === null){
             throw new Error("User doesnt exist");
         }

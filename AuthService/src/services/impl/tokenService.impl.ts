@@ -6,5 +6,5 @@ import { Token } from "../../entity/Tokens";
 export interface ITokenServiceImpl{
     generateTokens(userId: string, userAge: number) : IJwtUserResponseDto
     saveToken(userId: string, refreshToken: string): Promise<Token>
-    verifyAccessToken(token: string): Promise<JwtPayload>
+    verifyAccessToken(token: string): Promise<JwtPayload | null>
 }
