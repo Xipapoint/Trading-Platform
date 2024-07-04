@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Transaction } from './Transaction';
+import { WalletChangeOperation } from './WalletChange';
 
-@Entity()
+@Entity('wallets')
 export class Wallet{
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -9,7 +10,7 @@ export class Wallet{
     @Column()
     walletNumber: string;
     // Has to be hashed and cointaned 3-4 numbers
-    @Column({length: 4})
+    @Column({length: 255})
     walletPassword: string;
 
     @Column({default: false})
@@ -27,12 +28,15 @@ export class Wallet{
 
     @Column({ default: 'USD' })
     preferredCurrency: string;
+
+    @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
+    activatedAt: Date;
     
     @Column()
     userId: string;
 
-    @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
-    activatedAt: Date;
+    @OneToMany(() => WalletChangeOperation, walletChangeOperation => walletChangeOperation.wallet)
+    walletChangeOperations: WalletChangeOperation[]
 
     @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
     createdAt: Date;

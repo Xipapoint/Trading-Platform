@@ -48,6 +48,7 @@ class WalletSerivce implements IWalletServiceImpl{
         const walletPassword: string = await Security.hash(walletData.walletPassword);
         const userId: string = walletData.userId;
         const wallet: Wallet = this.walletRepository.create({walletNumber, walletPassword, userId})
+        await this.walletRepository.save(wallet);
         await producer.publishMessage('notification_queue', "createWallet", wallet.id);
         return wallet;
     }
