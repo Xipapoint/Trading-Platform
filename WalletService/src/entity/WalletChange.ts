@@ -1,5 +1,6 @@
 import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Wallet } from './Wallet';
+import { Security } from "../utils/security";
 
 @Entity('walletChangeOperations')
 export class WalletChangeOperation{
@@ -22,7 +23,7 @@ export class WalletChangeOperation{
     @BeforeInsert()
     setTitle() {
         if (!this.title) {
-            this.title = crypto.randomUUID();
+            this.title = Security.generateRandomString();
         }
     }
 }

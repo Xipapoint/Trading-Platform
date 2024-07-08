@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { Repository, W } from "typeorm";
 import { IGetWalletRequestDTO } from '../dto/req/GetWalletRequestDTO.interface';
 import { Security } from "../utils/security";
 import { IWalletServiceImpl } from "./impl/walletServiceImpl";
@@ -9,11 +9,14 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import producer from "../producer";
 import { ICreateWalletRequestDTO } from "../dto/req/CreateWalletRequestDTO.interface";
 import { IWalletRequestDTO } from "../dto/req/WalletRequestDTO.interface";
+import { WalletChangeOperation } from "../entity/WalletChange";
 
 class WalletSerivce implements IWalletServiceImpl{
     private walletRepository: Repository<Wallet>;
-    constructor(walletRepository: Repository<Wallet>){
+    private walletChangeOperationRepository: Repository<WalletChangeOperation>;
+    constructor(walletRepository: Repository<Wallet>, walletChangeOperationRepository: Repository<WalletChangeOperation>){
         this.walletRepository = walletRepository;
+        this.walletChangeOperationRepository = walletChangeOperationRepository;
     }
     //PRIVATE 
     async getWalletByToken(token: string): Promise<Wallet | null>{
@@ -82,7 +85,7 @@ class WalletSerivce implements IWalletServiceImpl{
         }
         const newWalletPassword: string = await Security.hash(walletData.walletPassword);
         wallet.walletPassword = newWalletPassword;
-        this.walletRepository.save(wallet)
+        await this.walletRepository.save(wallet)
         return wallet;
     }
 
@@ -96,10 +99,44 @@ class WalletSerivce implements IWalletServiceImpl{
         // Установить wallet.isCurrentActive в true
         return wallet
     }
-    freezeCard(walletId: string): Promise<Wallet> {
-        throw new Error("Method not implemented.");
+    async freezeCard(walletId: string): Promise<Wallet>{
+        const wallet: Wallet | null = await this.getWalletById(walletId);
+        if(wallet === null){
+            throw new Error("The wallet doesnt exist")
+        }
+        wallet.isFreezed = true;
+        await this.walletRepository.save(wallet)
+        return wallet;
     }
 
-}
+    //WALLET OPERATION CHANGES
+    async getWalletHistoryChanges(walletId: string): Promise<WalletChangeOperation[]>{
+       const walletChangeOperations: WalletChangeOperation[] | null = await this.walletChangeOperationRepository.find(
+        {where: 
+            {wallet: 
+                {id: walletId}
+            }
+        }
+       )
+        if(walletChangeOperations === null){
+            throw new Error("Couldnt find wallet operation")
+        }
 
-export default new WalletSerivce(AppDataSource.getRepository(Wallet));
+        return walletChangeOperations
+    }
+    async setWalletChangeOperationTitle(walletChangeOperationId: number, newTitle: string): Promise<string>{
+        if(typeof walletChangeOperationId !== 'number'){
+            throw new Error("Invalid ID of wallet operation")
+        }
+        const walletChangeOperation: WalletChangeOperation | null = await this.walletChangeOperationRepository.findOne({where: {id: walletChangeOperationId}})
+        if(walletChangeOperation === null){
+            throw new Error("Couldnt find wallet operation")
+        }
+        const previousTitle: string = walletChangeOperation.title;
+        walletChangeOperation.title = newTitle
+        await this.walletChangeOperationRepository.save(walletChangeOperation);
+        if(previousTitle === walletChangeOperation.title) throw new Error("Couldnt change title. Try again")
+        return walletChangeOperation.title;
+    }
+}
+export default new WalletSerivce(AppDataSource.getRepository(Wallet), AppDataSource.getRepository(WalletChangeOperation));

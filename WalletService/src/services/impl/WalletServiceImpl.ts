@@ -11,10 +11,9 @@ export interface IWalletServiceImpl{
     changeWalletPassword(walletData: IWalletRequestDTO): Promise<Wallet>
     setActiveCurrentCard(walletId: string, token: string): Promise<Wallet>
     // TODO: ДОДЕЛАТЬ
-    // freezeCard(walletId: string): Promise<Wallet>
-    // getWalletHistoryChanges(walletId: string): Promise<WalletChangeOperation[]>
-    // setWalletChangeOperationTitle(walletId: string): Promise<WalletChangeOperation>
-
+    freezeCard(walletId: string): Promise<Wallet>
+    getWalletHistoryChanges(walletId: string): Promise<WalletChangeOperation[]>
+    setWalletChangeOperationTitle(walletChangeOperationId: number, newTitle: string): Promise<string>
 
     // createTransaction()
     // getTransactionByUser()
